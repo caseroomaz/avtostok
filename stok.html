@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avto Stok Sistemi</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+margin:0;
+}
+
+header{
+background:#111;
+color:white;
+padding:20px;
+text-align:center;
+font-size:22px;
+letter-spacing:1px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+.search{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:20px;
+font-size:16px;
+}
+
+.brands{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.brand-btn{
+padding:10px 18px;
+border:none;
+border-radius:20px;
+background:#e0e0e0;
+cursor:pointer;
+font-weight:bold;
+}
+
+.brand-btn:hover{
+background:#111;
+color:white;
+}
+
+.card{
+background:white;
+border-radius:12px;
+padding:15px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.info{
+font-size:15px;
+}
+
+.stock{
+font-weight:bold;
+}
+
+.out{
+color:red;
+font-weight:bold;
+font-size:16px;
+}
+
+.add-box{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-top:30px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.add-box input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button.add{
+background:#111;
+color:white;
+border:none;
+padding:12px;
+border-radius:8px;
+cursor:pointer;
+width:100%;
+}
+
+button.add:hover{
+background:#333;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+Avtomobil Stok Sistemi
+</header>
+
+<div class="container">
+
+<input class="search" placeholder="Maşın axtar..." onkeyup="searchCar(this.value)">
+
+<div class="brands">
+<button class="brand-btn" onclick="filterBrand('Toyota')">Toyota</button>
+<button class="brand-btn" onclick="filterBrand('BMW')">BMW</button>
+<button class="brand-btn" onclick="filterBrand('Mercedes')">Mercedes</button>
+<button class="brand-btn" onclick="showAll()">Hamısı</button>
+</div>
+
+<div id="carList"></div>
+
+<div class="add-box">
+
+<h3>Maşın əlavə et</h3>
+
+<input id="brand" placeholder="Marka">
+<input id="model" placeholder="Model">
+<input id="color" placeholder="Rəng">
+<input id="package" placeholder="Komplektasiya">
+<input id="stock" type="number" placeholder="Say">
+
+<button class="add" onclick="addCar()">Əlavə et</button>
+
+</div>
+
+</div>
+
+<script>
+
+let cars = [
+
+{brand:"Toyota",model:"Corolla",color:"Ağ",package:"Full",stock:2},
+
+{brand:"Toyota",model:"Camry",color:"Qara",package:"Premium",stock:0},
+
+{brand:"BMW",model:"X5",color:"Ağ",package:"Full",stock:3},
+
+{brand:"Mercedes",model:"C200",color:"Boz",package:"AMG",stock:1}
+
+];
+
+function displayCars(list){
+
+let html="";
+
+list.forEach(car=>{
+
+html+=`
+<div class="card">
+
+<div class="info">
+<b>${car.brand} ${car.model}</b><br>
+Rəng: ${car.color} |
+${car.package}
+</div>
+
+<div class="stock">
+
+${car.stock>0?car.stock:"<span class='out'>TÜKƏNDİ</span>"}
+
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById("carList").innerHTML=html;
+
+}
+
+displayCars(cars);
+
+function searchCar(value){
+
+value=value.toLowerCase();
+
+let filtered=cars.filter(car=>
+car.brand.toLowerCase().includes(value) ||
+car.model.toLowerCase().includes(value)
+);
+
+displayCars(filtered);
+
+}
+
+function filterBrand(brand){
+
+let filtered=cars.filter(car=>car.brand===brand);
+
+displayCars(filtered);
+
+}
+
+function showAll(){
+
+displayCars(cars);
+
+}
+
+function addCar(){
+
+let brand=document.getElementById("brand").value;
+
+let model=document.getElementById("model").value;
+
+let color=document.getElementById("color").value;
+
+let pack=document.getElementById("package").value;
+
+let stock=document.getElementById("stock").value;
+
+cars.push({
+brand:brand,
+model:model,
+color:color,
+package:pack,
+stock:Number(stock)
+});
+
+displayCars(cars);
+
+}
+
+</script>
+
+</body>
+</html>

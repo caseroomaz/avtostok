@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple Center</title>
+
+<style>
+body {margin:0;font-family:Arial;background:#f4f4f4;}
+header {display:flex; flex-wrap:wrap; padding:15px; background:#111; color:white;}
+.sidebar {width:180px; display:flex; flex-direction:column; gap:10px;}
+.category-pill {background:#333;color:white;padding:8px 12px;border-radius:5px;cursor:pointer;user-select:none;}
+.category-pill:hover {background:#0071e3;}
+.main-header {flex:1; display:flex; flex-direction:column; gap:10px; margin-left:20px;}
+.search-box {display:flex; gap:5px;}
+.search-box input {padding:8px;width:250px;border-radius:5px;border:1px solid #ccc;}
+.search-box button {padding:8px 12px;border:none;border-radius:5px;background:#0071e3;color:white;cursor:pointer;}
+.search-box button:hover {background:#005bb5;}
+.products {display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;padding:20px;}
+.card {background:white;padding:15px;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.1);text-align:center;}
+.card img {width:100%;height:200px;object-fit:contain;}
+button.add {background:#0071e3;color:white;padding:10px;border:none;border-radius:5px;cursor:pointer;margin-top:10px;}
+button.add:hover {background:#005bb5;}
+.cart {position:fixed;right:-400px;top:0;width:320px;height:100%;background:white;box-shadow:-5px 0 15px rgba(0,0,0,0.2);padding:20px;transition:0.4s;overflow:auto;}
+.cart.active {right:0;}
+.close-cart {font-size:22px;cursor:pointer;float:right;}
+.cart h2 {margin-top:0;}
+.cart-btn {cursor:pointer; margin-left:auto;}
+</style>
+</head>
+<body>
+
+<header>
+<div class="sidebar">
+<div class="category-pill" onclick="filterCategory('all')">Hamısı</div>
+<div class="category-pill" onclick="filterCategory('Apple')">Apple</div>
+<div class="category-pill" onclick="filterCategory('Samsung')">Samsung</div>
+<div class="category-pill" onclick="filterCategory('Xiaomi')">Xiaomi</div>
+<div class="category-pill" onclick="filterCategory('Honor')">Honor</div>
+</div>
+
+<div class="main-header">
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Telefon axtar...">
+<button onclick="searchProductButton()">Axtar</button>
+</div>
+<div class="cart-btn" onclick="openCart()">🛒 Səbət (<span id="cart-count">0</span>)</div>
+</div>
+</header>
+
+<section class="products" id="products"></section>
+
+<div class="cart" id="cart">
+<span class="close-cart" onclick="openCart()">✖</span>
+<h2>Səbət</h2>
+<div id="cart-items"></div>
+<br>
+<input type="text" id="customerName" placeholder="Adınız" style="width:100%;padding:8px;"><br><br>
+<input type="text" id="customerPhone" placeholder="Telefon nömrəniz" style="width:100%;padding:8px;"><br><br>
+<button class="add" onclick="checkout()">Sifariş et</button>
+</div>
+
+<script>
+let products = [
+
+/* ================= APPLE ================= */
+{name:"iPhone 17 Pro Max 256GB", price:3299.99, category:"Apple", image:"https://appdom.ru/image/cache/catalog/iphone/ip17promax/apple-iphone-17-pro-max-cosmic-orange-1-1200x630.jpg"},
+{name:"iPhone 17 Pro Max 512GB", price:3849.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/15426853/2a0000019aa0801247ae337315bf54b631c8/orig"},
+{name:"iPhone 17 Pro Max 2TB", price:5399.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/18332354/2a0000019a8584bf6dba522c47196d9e5c01/orig"},
+{name:"iPhone 17 Pro 256GB", price:2999.99, category:"Apple", image:"https://appdom.ru/image/cache/catalog/iphone/ip17promax/apple-iphone-17-pro-max-cosmic-orange-1-1200x630.jpg"},
+{name:"iPhone 17 Pro 512GB", price:3499.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/16488168/2a0000019aafc674dbf1dc61f04d2804bf84/orig"},
+{name:"iPhone 17 Pro 1TB", price:4039.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/12216141/2a0000019b2cf1c09b21a3b7a7bafdf84a36/orig"},
+{name:"iPhone 17 256GB", price:2169.99, category:"Apple", image:"https://formulatv.ru/images/catalog/smartfoni/apple-iphone-17-512gb-nano-sim-esim-black_full.jpg"},
+{name:"iPhone 17 512GB", price:2699.99, category:"Apple", image:"https://telemarket24.ru/upload/img/iphone-17-protiv-iphone-16_3.png"},
+{name:"iPhone Air 256GB", price:2399.99, category:"Apple", image:"https://device365.ru/upload/iblock/116/83zrtitvtkk03fon5jx9b2075wpu5vaj.jpg"},
+{name:"iPhone Air 512GB", price:3039.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/15422059/2a0000019931510b5993e291c6ba58dba243/orig"},
+{name:"iPhone Air 1TB", price:3269.99, category:"Apple", image:"https://device365.ru/upload/iblock/116/83zrtitvtkk03fon5jx9b2075wpu5vaj.jpg"},
+{name:"iPhone 16 128GB", price:1759.99, category:"Apple", image:"https://main-cdn.sbermegamarket.ru/big1/hlr-system/-78/073/542/510/161/117/100070816820b0.jpg"},
+{name:"iPhone 16 256GB", price:2039.99, category:"Apple", image:"https://avatars.mds.yandex.net/get-mpic/4934335/2a000001920633259ef408c2ec4ed0a46da3/orig"},
+{name:"iPhone 14 128GB", price:1299.99, category:"Apple", image:"https://avatars.mds.yandex.net/i?id=871e9c8bed63e8c6c0b563ecb153d069_l-9856874-images-thumbs&n=13"},
+{name:"iPhone 13 128GB", price:1099.99, category:"Apple", image:"https://main-cdn.sbermegamarket.ru/hlr-system/-22/906/731/510/244/23/100049930661b0.jpg"},
+
+/* ================= SAMSUNG ================= */
+{name:"Samsung Galaxy S25 128GB", price:1669.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3289_11.png"},
+{name:"Samsung Galaxy S25 256GB", price:1919.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3287_1.png"},
+{name:"Samsung Galaxy S25+ 256GB", price:2199.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/f8158826193ba5faa8b862a9bd1eb9e9/t/m/tm-dg-sbp-1105-sm-3276_1_1.png"},
+{name:"Samsung Galaxy S25 Ultra 256GB", price:2649.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3275_1_1.png"},
+{name:"Samsung Galaxy S25 Ultra 512GB", price:2899.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3273_1_1.png"},
+{name:"Samsung Galaxy S25 Ultra 1TB", price:3599.99, category:"Samsung", image:"https://kontakt.az/media/catalog/product/cache/f8158826193ba5faa8b862a9bd1eb9e9/t/m/tm-dg-sbp-1105-sm-3274_1_1.png"},
+
+
+/* ================= XIAOMI ================= */
+{name:"Xiaomi Redmi 15 6/128GB", price:289.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3767_1.png"},
+{name:"Xiaomi Redmi 15 8/256GB", price:369.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3769_1.png"},
+{name:"Xiaomi Redmi 15C 4/128GB", price:249.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3760_1.png"},
+{name:"Xiaomi Redmi 15C 8/256GB", price:289.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3633_111.png"},
+{name:"Xiaomi Redmi 14C 4/128GB", price:309.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3030_12.png"},
+{name:"Xiaomi Redmi 14C 8/256GB", price:339.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3028_1_1.png"},
+{name:"Xiaomi 15", price:1061.99, category:"Xiaomi", image:"https://media.bakuelectronics.az/media/inventImages/Smartfon_Xiaomi_15_12GB512GB_BLACK_1.webp"},
+{name:"Xiaomi 15T", price:1309.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/fbd42596869cc4deb59edfc1ed742a64/t/m/tm-dg-sbp-1105-sm-3786_1-f9a1d949.webp"},
+{name:"Xiaomi 15T Pro 5G", price:1783.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3789_1.png"},
+{name:"Xiaomi 15 Ultra", price:1513.99, category:"Xiaomi", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3813_1.png"},
+
+/* ================= HONOR ================= */
+{name:"Honor X9d 8GB/256GB", price:739.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3853_1.png"},
+{name:"Honor X9d 12GB/256GB", price:829.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3852_1.png"},
+{name:"Honor X9c 8GB/256GB", price:579.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3221_1_1_.png"},
+{name:"Honor X8d 8GB/128GB", price:539.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/fbd42596869cc4deb59edfc1ed742a64/t/m/tm-dg-sbp-1105-sm-4028_1-d4f82ca7.webp"},
+{name:"Honor X8d 8GB/256GB", price:589.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/fbd42596869cc4deb59edfc1ed742a64/t/m/tm-dg-sbp-1105-sm-4029_1-c5907be8.webp"},
+{name:"Honor X8c 8GB/128GB", price:429.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3306_3.png"},
+{name:"Honor X8c 8GB/256GB", price:519.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3307_3.png"},
+{name:"Honor X7d 8GB/128GB", price:439.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3771_1_1.png"},
+{name:"Honor X7d 8GB/256GB", price:489.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3772_1.png"},
+{name:"Honor X7c 6GB/128GB", price:359.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3066_1.png"},
+{name:"Honor X7c 8GB/256GB", price:399.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3065_12.png"},
+{name:"Honor X6c 6GB/128GB", price:369.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-3615_1_1_.png"},
+{name:"Honor X6b 6GB/256GB", price:359.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-2831_12.png"},
+{name:"Honor X8b 8GB/128GB", price:389.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-2726_1.png"},
+{name:"Honor X8b 8GB/256GB", price:469.99, category:"Honor", image:"https://kontakt.az/media/catalog/product/cache/a977c878f270f6fca58294fa1dd9481d/t/m/tm-dg-sbp-1105-sm-2726_1.png"}
+
+];
+
+let cart=[];
+let currentCategory="all";
+
+function displayProducts(){
+let container=document.getElementById("products");
+container.innerHTML="";
+products
+.filter(p=> currentCategory==="all" || p.category===currentCategory)
+.forEach((p,i)=>{
+container.innerHTML+=`
+<div class="card">
+<img src="${p.image}" alt="${p.name}">
+<h3>${p.name}</h3>
+<p><b>${p.price} AZN</b></p>
+<button class="add" onclick="addToCart(${i})">Səbətə əlavə et</button>
+</div>`;
+});
+}
+
+function filterCategory(cat){
+currentCategory=cat;
+displayProducts();
+}
+
+function searchProduct(text){
+text=text.toLowerCase();
+let container=document.getElementById("products");
+container.innerHTML="";
+products
+.filter(p=>p.name.toLowerCase().includes(text))
+.forEach((p,i)=>{
+container.innerHTML+=`
+<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p><b>${p.price} AZN</b></p>
+<button class="add" onclick="addToCart(${i})">Səbətə əlavə et</button>
+</div>`;});
+}
+
+function searchProductButton(){
+let text=document.getElementById("searchInput").value;
+searchProduct(text);
+}
+
+function addToCart(index){
+cart.push(products[index]);
+document.getElementById("cart-count").innerText=cart.length;
+}
+
+function openCart(){
+document.getElementById("cart").classList.toggle("active");
+displayCart();
+}
+
+function displayCart(){
+let items=document.getElementById("cart-items");
+items.innerHTML="";
+cart.forEach(item=>{
+items.innerHTML+=`<p>${item.name} - ${item.price} AZN</p>`;
+});
+}
+
+function checkout(){
+alert("Sifariş göndərildi!");
+cart=[];
+document.getElementById("cart-count").innerText=0;
+document.getElementById("cart-items").innerHTML="";
+}
+
+displayProducts();
+
+</script>
+
+</body>
+</html>
